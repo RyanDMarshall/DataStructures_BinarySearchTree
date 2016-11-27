@@ -1,0 +1,13 @@
+trained on 8 examples
+
+test data:
+  correct = euchre, predicted = euchre
+  content = my code segfaults when bob is the dealer
+
+  correct = euchre, predicted = calculator
+  content = no rational explanation for this bug
+
+  correct = calculator, predicted = calculator
+  content = countif function in stack class not working
+
+performance: 2 / 3 documents predicted correctly
