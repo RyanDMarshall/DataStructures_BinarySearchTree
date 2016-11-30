@@ -310,7 +310,8 @@ private:
   // NOTE:    This function must run in constant time.
   //          No iteration or recursion is allowed.
   static bool empty_impl(const Node *node) {
-    assert(false);
+
+    return node == nullptr;
   }
 
   // EFFECTS: Returns the size of the tree rooted at 'node', which is the
@@ -318,7 +319,21 @@ private:
   //          tree is 0.
   // NOTE:    This function must be tree recursive.
   static int size_impl(const Node *node) {
-    assert(false);
+
+    if (empty_impl(node)) {
+      return 0;
+    }
+
+    if (node->right == nullptr && node->left == nullptr) {
+      return 1;
+    } else if (node->right == nullptr) {
+      return (1 + size_impl(node->left));
+    } else if (node->left == nullptr) {
+      return (1 + size_impl(node->right));
+    } else {
+      return (1 + (size_impl(node->left) + size_impl(node->right)));
+    }
+
   }
 
   // EFFECTS: Returns the height of the tree rooted at 'node', which is the
@@ -326,7 +341,24 @@ private:
   //          The height of an empty tree is 0.
   // NOTE:    This function must be tree recursive.
   static int height_impl(const Node *node) {
-    assert(false);
+
+    if (empty_impl(node)) {
+      return 0;
+    }
+
+    if (node->right == nullptr && node->left == nullptr) {
+      return 1;
+    } else if (node->right == nullptr) {
+      return (1 + height_impl(node->left));
+    } else if (node->left == nullptr) {
+      return (1 + height_impl(node->right));
+    } else {
+      if (height_impl(node->left) <= height_impl(node->right)){
+        return (1 + height_impl(node->right));
+      } else {
+        return (1 + height_impl(node->left));
+      }
+    }
   }
 
   // EFFECTS: Creates and returns a pointer to the root of a new node structure
@@ -334,13 +366,54 @@ private:
   //          tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static Node *copy_nodes_impl(Node *node) {
-    assert(false);
+
+    Node* copy_node = new Node;
+
+    if (node == nullptr) {
+      copy_node = nullptr;
+    }
+
+    copy_node->datum = node->datum;
+    copy_node->left = copy_node_impl(node->left);
+    copy_node->right = copy_node_impl(node_right);
+
+    return copy_node;
   }
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
   static void destroy_nodes_impl(Node *node) {
-    assert(false);
+
+    if (node->right != nullptr) {
+      if (node->right->right == nullptr && node->right->left == nullptr) {
+        delete node->right;
+        node->right = nullptr;
+      } else if (node->right->right == nullptr) {
+        destroy_nodes_impl(node->right->left);
+      } else if (node->right->left == nullptr) {
+        destroy_nodes_impl(node->right->right);
+      } else {
+        destroy_nodes_impl(node->right);
+      }
+    }
+
+    if (node->left != nullptr) {
+      if (node->left->left == nullptr && node->left->right == nullptr) {
+        delete node->left;
+        node->left = nullptr;
+      } else if (node->left->left == nullptr) {
+        destroy_nodes_impl(node->left->right);
+      } else if (node->left->right == nullptr) {
+        destroy_nodes_impl(node->left->left);
+      } else {
+        destroy_nodes_impl(node->left);
+      }
+    }
+
+    if (node->left == nullptr && node->right == nullptr) {
+      delete node;
+      node = nullptr;
+    }
   }
 
   // EFFECTS : Searches the tree rooted at 'node' for an element equivalent
