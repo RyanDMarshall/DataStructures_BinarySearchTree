@@ -507,7 +507,6 @@ private:
     } else {
       return max_element_impl(node->right);
     }
-
   }
 
 
@@ -526,7 +525,16 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#In-order
   //       for the definition of a in-order traversal.
   static void traverse_inorder_impl(const Node *node, std::ostream &os) {
-    assert(false);
+    if (empty_impl(node)) {
+      return;
+    }
+    if (node->left != 0) {
+      traverse_inorder_impl(node->left, os);
+    }
+    os << node->datum << " ";
+    if (node->right != 0) {
+      traverse_inorder_impl(node->right, os);
+    }
   }
 
   // EFFECTS : Traverses the tree rooted at 'node' using a pre-order traversal,
@@ -537,7 +545,16 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#Pre-order
   //       for the definition of a pre-order traversal.
   static void traverse_preorder_impl(const Node *node, std::ostream &os) {
-    assert(false);
+    os << node->datum << " ";
+    if (empty_impl(node)) {
+      return;
+    }
+    if (node->left != 0) {
+      traverse_inorder_impl(node->left, os);
+    }
+    if (node->right != 0) {
+      traverse_inorder_impl(node->right, os);
+    }
   }
 
   // EFFECTS : Returns a pointer to the Node containing the smallest element
@@ -553,6 +570,7 @@ private:
   //       about where the element you're looking for could be.
   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
 
+    /* Ryan's long ass code that definitely works:
     if (node == nullptr || less(max_element_impl(node)->datum, val)) {
       return nullptr;
     }
@@ -603,7 +621,27 @@ private:
     }
 
     // Fix for "Control reaches end of non-void function" Error
-    return nullptr;
+    return nullptr; */
+
+    Node * min_greater = node->right;
+    return min_greater_than_impl_helper(node, val, less, min_greater);
+  }
+
+  static Node * min_greater_than_impl_helper(Node *node, const T &val, Compare less, Node * min_greater) {
+    if (node == min_greater) {
+      return min_greater;
+    }
+    if (!less(node->datum, val)) {
+      // value is less or equal to datum
+      return min_greater_than_impl_helper(node->left, val, less, min_greater);
+    }
+    else {
+      // value is larger than datum
+      if (less(node->datum, min_greater->datum)) { //if node datum is smaller than min_greater
+        min_greater = node;
+      }
+      return min_greater_than_impl_helper(node->right, val, less, min_greater);
+    }
   }
 
 
