@@ -649,7 +649,7 @@ private:
   }
 
   static Node * min_greater_than_impl_helper(Node *node, const T &val, Compare less, Node * min_greater) {
-    if (node == min_greater) {
+    if (node == 0) {
       return min_greater;
     }
     if (!less(node->datum, val)) {
