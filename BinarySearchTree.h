@@ -311,7 +311,7 @@ private:
   //          No iteration or recursion is allowed.
   static bool empty_impl(const Node *node) {
 
-    return node == nullptr;
+    return (node == nullptr);
   }
 
   // EFFECTS: Returns the size of the tree rooted at 'node', which is the
@@ -429,7 +429,26 @@ private:
   //       Two elements A and B are equivalent if and only if A is
   //       not less than B and B is not less than A.
   static Node * find_impl(Node *node, const T &query, Compare less) {
-    assert(false);
+
+    if (empty_impl(node)) {
+      return nullptr;      
+    }
+
+    if (!less(node->datum, query) && !less(query, node->datum)) {
+      return node;
+    } else if (less(query, node->datum)) {
+      if (node->left != nullptr) {
+        return find_impl(node->left, query, less);
+      } else {
+        return nullptr;
+      }
+    } else if (less(node->datum, query)) {
+      if (node->right != nullptr) {
+        return find_impl(node->right, query, less);
+      } else {
+        return nullptr;
+      }
+    }
   }
 
   // REQUIRES: item is not already contained in the tree rooted at 'node'
@@ -447,7 +466,9 @@ private:
   //       template, NOT according to the < operator. Use the "less"
   //       parameter to compare elements.
   static Node * insert_impl(Node *node, const T &item, Compare less) {
-    assert(false);
+
+    
+    
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element
@@ -458,7 +479,16 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the smallest element lives.
   static Node * min_element_impl(Node *node) {
-    assert(false);
+
+    if (empty_impl(node)) {
+      return nullptr;
+    }
+
+    if (node->left == nullptr) {
+      return node;
+    } else {
+      return min_element_impl(node->left);
+    }
   }
 
   // EFFECTS : Returns a pointer to the Node containing the maximum element
@@ -467,7 +497,17 @@ private:
   // HINT: You don't need to compare any elements! Think about the
   //       structure, and where the largest element lives.
   static Node * max_element_impl(Node *node) {
-    assert(false);
+    
+    if (empty_impl(node)) {
+      return nullptr;
+    }
+
+    if (node->right == nullptr) {
+      return node;
+    } else {
+      return max_element_impl(node->right);
+    }
+
   }
 
 
@@ -512,7 +552,58 @@ private:
   //       'less' parameter). Based on the result, you gain some information
   //       about where the element you're looking for could be.
   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
-    assert(false);
+
+    if (node == nullptr || less(max_element_impl(node)->datum, val)) {
+      return nullptr;
+    }
+
+    if (node->right == nullptr && node->left == nullptr) {
+      if (!less(node->datum, val) && !less(val, node->datum)) {
+        return nullptr;
+      } else if (less(val, node->datum)) {
+        return node;
+      } else if (less(node->datum, val)) {
+        return nullptr;
+      }
+    }
+
+    if (node->right == nullptr) {
+      if (!less(node->datum, val) && !less(val, node->datum)) {
+        return nullptr;
+      } else if (less(val, node->datum)) {
+        return min_greater_than_impl(node->left, val, less);
+      } else if (less(node->datum, val)) {
+        return nullptr; 
+      }
+    }
+
+    if (node->left == nullptr) {
+      if (!less(node->datum, val) && !less(val, node->datum)) {
+        return min_greater_than_impl(node->right, val, less);
+      } else if (less(val, node->datum)) {
+        return node;
+      } else if (less(node->datum, val)) {
+        return min_greater_than_impl(node->right, val, less);
+      }
+    }
+
+    if (!less(node->datum, val) && !less(val, node->datum)) {
+      return min_greater_than_impl(node->right, val, less);
+    } else if (less(val, node->datum)) {
+      if (!less(max_element_impl(node->left)->datum, val) 
+      && !less(val, max_element_impl(node->left)->datum)) {
+        return node;
+      } else if (less(max_element_impl(node->left)->datum, val)) {
+        return node;
+      } else if (less(val, max_element_impl(node->left)->datum)) {
+        return min_greater_than_impl(node->left, val, less);
+      }
+    } else if (less(node->datum, val)) {
+      return min_greater_than_impl(node->right, val, less);
+    }
+
+    // Fix for "Control reaches end of non-void function" Error
+    return nullptr;
   }
 
 
