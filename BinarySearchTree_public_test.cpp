@@ -12,15 +12,24 @@ int main() {
   assert(tree.size() == 1);
   assert(tree.height() == 1);
 
+  cout << "Test 1" << endl;
+
   assert(tree.find(5) != tree.end());
+
+  cout << "Test 2" << endl;
 
   tree.insert(7);
   tree.insert(3);
+
+  cout << "Test 3" << endl;
 
   assert(tree.check_sorting_invariant());
   assert(*tree.max_element() == 7);
   assert(*tree.min_element() == 3);
   assert(*tree.min_greater_than(5) == 7);
+
+  cout << "Test 4" << endl;
+
 
   cout << "cout << tree.to_string()" << endl;
   cout << tree.to_string() << endl << endl;

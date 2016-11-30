@@ -326,14 +326,15 @@ private:
 
     if (node->right == nullptr && node->left == nullptr) {
       return 1;
-    } else if (node->right == nullptr) {
+    } 
+    if (node->right == nullptr) {
       return (1 + size_impl(node->left));
-    } else if (node->left == nullptr) {
+    } 
+    if (node->left == nullptr) {
       return (1 + size_impl(node->right));
-    } else {
-      return (1 + (size_impl(node->left) + size_impl(node->right)));
     }
 
+    return (1 + (size_impl(node->left) + size_impl(node->right)));
   }
 
   // EFFECTS: Returns the height of the tree rooted at 'node', which is the
@@ -449,6 +450,9 @@ private:
         return nullptr;
       }
     }
+
+    // Fix for "Control reach end of non-void function" Error
+    return nullptr;
   }
 
   // REQUIRES: item is not already contained in the tree rooted at 'node'
@@ -467,8 +471,25 @@ private:
   //       parameter to compare elements.
   static Node * insert_impl(Node *node, const T &item, Compare less) {
 
+    if (find_impl(node, item, less) != nullptr) {
+      assert(false);
+    }
+
+    Node *insert_node = new Node(item, nullptr, nullptr);
+
+    if (empty_impl(node)) {
+      return insert_node;
+    } else {
+      //Need to fix
+
+      insert_node->left = min_greater_than_impl(node, item, less)->left->left;
+      insert_node->right = min_greater_than_impl(node, item, less)->left->right;
+      min_greater_than_impl(node, item, less)->left = insert_node;
+
+      return node;
+    }
     
-    
+    return node;
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element
@@ -570,7 +591,7 @@ private:
   //       about where the element you're looking for could be.
   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
 
-    /* Ryan's long ass code that definitely works:
+    // Ryan's long ass code that definitely works:
     if (node == nullptr || less(max_element_impl(node)->datum, val)) {
       return nullptr;
     }
@@ -621,7 +642,7 @@ private:
     }
 
     // Fix for "Control reaches end of non-void function" Error
-    return nullptr; */
+    return nullptr; /*
 
     Node * min_greater = node->right;
     return min_greater_than_impl_helper(node, val, less, min_greater);
@@ -641,7 +662,7 @@ private:
         min_greater = node;
       }
       return min_greater_than_impl_helper(node->right, val, less, min_greater);
-    }
+    }*/
   }
 
 
