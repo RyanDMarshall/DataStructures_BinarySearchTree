@@ -374,8 +374,8 @@ private:
     }
 
     copy_node->datum = node->datum;
-    copy_node->left = copy_node_impl(node->left);
-    copy_node->right = copy_node_impl(node_right);
+    copy_node->left = copy_nodes_impl(node->left);
+    copy_node->right = copy_nodes_impl(node->right);
 
     return copy_node;
   }
