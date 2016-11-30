@@ -471,25 +471,53 @@ private:
   //       parameter to compare elements.
   static Node * insert_impl(Node *node, const T &item, Compare less) {
 
-    if (find_impl(node, item, less) != nullptr) {
-      assert(false);
-    }
-
-    Node *insert_node = new Node(item, nullptr, nullptr);
+    assert(find_impl(node, item, less) == nullptr);
 
     if (empty_impl(node)) {
+      Node *insert_node = new Node(item, nullptr, nullptr);
       return insert_node;
     } else {
-      //Need to fix
 
-      insert_node->left = min_greater_than_impl(node, item, less)->left->left;
-      insert_node->right = min_greater_than_impl(node, item, less)->left->right;
-      min_greater_than_impl(node, item, less)->left = insert_node;
+      if (node->left == nullptr && node->right == nullptr) {
+        if (less(node->datum, item)) {
+          Node *insert_node = new Node(item, nullptr, nullptr);
+          node->right = insert_node;
+        } else {
+          Node *insert_node = new Node(item, nullptr, nullptr);
+          node->left = insert_node;
+        }
+
+        return node;
+      }
+      
+      if (node->left == nullptr) {
+        if (less(node->datum, item)) {
+          return insert_impl(node->right, item, less);
+        } else {
+          Node *insert_node = new Node(item, nullptr, nullptr);
+          node->left = insert_node;
+          return node;
+        }
+      }
+
+      if (node->right == nullptr) {
+        if (less(node->datum, item)) {
+          Node *insert_node = new Node(item, nullptr, nullptr);
+          node->right = insert_node;
+          return node;
+        } else {
+          return insert_impl(node->left, item, less);
+        } 
+      }
+
+      if (less(node->datum, item)) {
+        return insert_impl(node->right, item, less);
+      } else {
+        return insert_impl(node->left, item, less);
+      }
 
       return node;
     }
-    
-    return node;
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element
