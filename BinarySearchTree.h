@@ -372,11 +372,11 @@ private:
 
     if (node == nullptr) {
       copy_node = nullptr;
+    } else {
+      copy_node->datum = node->datum;
+      copy_node->left = copy_nodes_impl(node->left);
+      copy_node->right = copy_nodes_impl(node->right);
     }
-
-    copy_node->datum = node->datum;
-    copy_node->left = copy_nodes_impl(node->left);
-    copy_node->right = copy_nodes_impl(node->right);
 
     return copy_node;
   }
@@ -695,29 +695,8 @@ private:
     }
 
     // Fix for "Control reaches end of non-void function" Error
-    return nullptr; /*
-
-    Node * min_greater = node->right;
-    return min_greater_than_impl_helper(node, val, less, min_greater);
+    return nullptr; 
   }
-
-  static Node * min_greater_than_impl_helper(Node *node, const T &val, Compare less, Node * min_greater) {
-    if (node == min_greater) {
-      return min_greater;
-    }
-    if (!less(node->datum, val)) {
-      // value is less or equal to datum
-      return min_greater_than_impl_helper(node->left, val, less, min_greater);
-    }
-    else {
-      // value is larger than datum
-      if (less(node->datum, min_greater->datum)) { //if node datum is smaller than min_greater
-        min_greater = node;
-      }
-      return min_greater_than_impl_helper(node->right, val, less, min_greater);
-    }*/
-  }
-
 
 }; // END of BinarySearchTree class
 
