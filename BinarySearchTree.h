@@ -372,11 +372,11 @@ private:
 
     if (node == nullptr) {
       copy_node = nullptr;
+    } else {
+      copy_node->datum = node->datum;
+      copy_node->left = copy_nodes_impl(node->left);
+      copy_node->right = copy_nodes_impl(node->right);
     }
-
-    copy_node->datum = node->datum;
-    copy_node->left = copy_nodes_impl(node->left);
-    copy_node->right = copy_nodes_impl(node->right);
 
     return copy_node;
   }
@@ -695,6 +695,7 @@ private:
     }
 
     // Fix for "Control reaches end of non-void function" Error
+<<<<<<< HEAD
     return nullptr; */
     return min_greater_than_impl_helper(node, val, less, nullptr);
   }
@@ -719,7 +720,6 @@ private:
       return min_greater_than_impl_helper(node->right, val, less, min_greater);
     }
   }
-
 
 }; // END of BinarySearchTree class
 
