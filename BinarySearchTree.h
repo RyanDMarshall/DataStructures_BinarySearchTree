@@ -645,7 +645,7 @@ private:
   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
 
     // Ryan's long ass code that definitely works:
-    if (node == nullptr || less(max_element_impl(node)->datum, val)) {
+    /*if (node == nullptr || less(max_element_impl(node)->datum, val)) {
       return nullptr;
     }
 
@@ -695,27 +695,29 @@ private:
     }
 
     // Fix for "Control reaches end of non-void function" Error
-    return nullptr; /*
-
-    Node * min_greater = node->right;
-    return min_greater_than_impl_helper(node, val, less, min_greater);
+    return nullptr; */
+    return min_greater_than_impl_helper(node, val, less, nullptr);
   }
 
   static Node * min_greater_than_impl_helper(Node *node, const T &val, Compare less, Node * min_greater) {
-    if (node == min_greater) {
+    if (node == nullptr) {
       return min_greater;
     }
-    if (!less(node->datum, val)) {
-      // value is less or equal to datum
+    if (less(val, node->datum)) {
+      // value is less than datum
+      if (min_greater == nullptr) {
+        min_greater = node;
+      }
+      else if (less(node->datum, min_greater->datum)) { //if node datum is smaller than min_greater
+        min_greater = node;
+      }
       return min_greater_than_impl_helper(node->left, val, less, min_greater);
     }
     else {
-      // value is larger than datum
-      if (less(node->datum, min_greater->datum)) { //if node datum is smaller than min_greater
-        min_greater = node;
-      }
+      // value is larger or equal to datum
+      
       return min_greater_than_impl_helper(node->right, val, less, min_greater);
-    }*/
+    }
   }
 
 
