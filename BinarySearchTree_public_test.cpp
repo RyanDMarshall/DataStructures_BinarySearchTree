@@ -17,9 +17,12 @@ int main() {
   assert(tree.find(5) != tree.end());
 
   cout << "Test 2" << endl;
-
+cout << tree.to_string() << endl << endl;
   tree.insert(7);
+  cout << tree.to_string() << endl << endl;
   tree.insert(3);
+
+  cout << tree.to_string() << endl << endl;
 
   cout << "Test 3" << endl;
 

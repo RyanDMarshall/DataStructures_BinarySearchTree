@@ -383,9 +383,16 @@ private:
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
-  static void destroy_nodes_impl(Node *node) {
+  static void destroy_nodes_impl(Node *node) { 
 
-    if (node->right != nullptr) {
+  //Simplify code
+    if (node->left == nullptr && node->right == nullptr) {
+      destroy_nodes_impl(node->left);
+      destroy_nodes_impl(node->right);
+      delete node;
+      node = nullptr;
+    }
+  /*if (node->right != nullptr) {
       if (node->right->right == nullptr && node->right->left == nullptr) {
         delete node->right;
         node->right = nullptr;
@@ -414,7 +421,7 @@ private:
     if (node->left == nullptr && node->right == nullptr) {
       delete node;
       node = nullptr;
-    }
+    }*/
   }
 
   // EFFECTS : Searches the tree rooted at 'node' for an element equivalent
@@ -470,8 +477,21 @@ private:
   //       template, NOT according to the < operator. Use the "less"
   //       parameter to compare elements.
   static Node * insert_impl(Node *node, const T &item, Compare less) {
+    
+    if (empty_impl(node)) {
+      node = new Node(item, nullptr, nullptr);
+      return node;
+    }
 
-    assert(find_impl(node, item, less) == nullptr);
+    if (less(item, node->datum)) {
+      node->left = insert_impl(node->left, item, less);
+    }
+    else {
+      node->right = insert_impl(node->right, item, less);
+    }
+
+    return node;
+    /*assert(find_impl(node, item, less) == nullptr);
 
     if (empty_impl(node)) {
       Node *insert_node = new Node(item, nullptr, nullptr);
@@ -517,7 +537,7 @@ private:
       }
 
       return node;
-    }
+    }*/
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element
