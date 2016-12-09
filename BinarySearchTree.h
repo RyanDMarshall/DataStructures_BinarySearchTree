@@ -368,60 +368,40 @@ private:
   // NOTE:    This function must be tree recursive.
   static Node *copy_nodes_impl(Node *node) {
 
-    Node* copy_node = new Node;
-
     if (node == nullptr) {
-      copy_node = nullptr;
-    } else {
+      return nullptr;
+    } 
+    else {
+      Node* copy_node = new Node;
+
       copy_node->datum = node->datum;
       copy_node->left = copy_nodes_impl(node->left);
       copy_node->right = copy_nodes_impl(node->right);
-    }
 
-    return copy_node;
+      return copy_node;
+    }
   }
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
-  static void destroy_nodes_impl(Node *node) { 
+  static void destroy_nodes_impl(Node *node) {
 
-  //Simplify code
-    if (node->left == nullptr && node->right == nullptr) {
-      destroy_nodes_impl(node->left);
-      destroy_nodes_impl(node->right);
-      delete node;
-      node = nullptr;
+    if (empty_impl(node)) {
+      return;
     }
-  /*if (node->right != nullptr) {
-      if (node->right->right == nullptr && node->right->left == nullptr) {
-        delete node->right;
-        node->right = nullptr;
-      } else if (node->right->right == nullptr) {
-        destroy_nodes_impl(node->right->left);
-      } else if (node->right->left == nullptr) {
-        destroy_nodes_impl(node->right->right);
-      } else {
-        destroy_nodes_impl(node->right);
-      }
-    }
-
     if (node->left != nullptr) {
-      if (node->left->left == nullptr && node->left->right == nullptr) {
-        delete node->left;
-        node->left = nullptr;
-      } else if (node->left->left == nullptr) {
-        destroy_nodes_impl(node->left->right);
-      } else if (node->left->right == nullptr) {
-        destroy_nodes_impl(node->left->left);
-      } else {
-        destroy_nodes_impl(node->left);
-      }
+      destroy_nodes_impl(node->left);
+      node->left = nullptr;
     }
-
+    if (node->right != nullptr) {
+      destroy_nodes_impl(node->right);
+      node->right = nullptr;
+    }
     if (node->left == nullptr && node->right == nullptr) {
       delete node;
       node = nullptr;
-    }*/
+      return;
+    }
   }
 
   // EFFECTS : Searches the tree rooted at 'node' for an element equivalent
@@ -479,7 +459,9 @@ private:
   static Node * insert_impl(Node *node, const T &item, Compare less) {
     
     if (empty_impl(node)) {
-      node = new Node(item, nullptr, nullptr);
+      Node * insert = new Node(item, nullptr, nullptr);
+      node = insert;
+      insert = nullptr;
       return node;
     }
 
@@ -491,53 +473,6 @@ private:
     }
 
     return node;
-    /*assert(find_impl(node, item, less) == nullptr);
-
-    if (empty_impl(node)) {
-      Node *insert_node = new Node(item, nullptr, nullptr);
-      return insert_node;
-    } else {
-
-      if (node->left == nullptr && node->right == nullptr) {
-        if (less(node->datum, item)) {
-          Node *insert_node = new Node(item, nullptr, nullptr);
-          node->right = insert_node;
-        } else {
-          Node *insert_node = new Node(item, nullptr, nullptr);
-          node->left = insert_node;
-        }
-
-        return node;
-      }
-      
-      if (node->left == nullptr) {
-        if (less(node->datum, item)) {
-          return insert_impl(node->right, item, less);
-        } else {
-          Node *insert_node = new Node(item, nullptr, nullptr);
-          node->left = insert_node;
-          return node;
-        }
-      }
-
-      if (node->right == nullptr) {
-        if (less(node->datum, item)) {
-          Node *insert_node = new Node(item, nullptr, nullptr);
-          node->right = insert_node;
-          return node;
-        } else {
-          return insert_impl(node->left, item, less);
-        } 
-      }
-
-      if (less(node->datum, item)) {
-        return insert_impl(node->right, item, less);
-      } else {
-        return insert_impl(node->left, item, less);
-      }
-
-      return node;
-    }*/
   }
 
   // EFFECTS : Returns a pointer to the Node containing the minimum element
@@ -619,14 +554,9 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#In-order
   //       for the definition of a in-order traversal.
   static void traverse_inorder_impl(const Node *node, std::ostream &os) {
-    if (empty_impl(node)) {
-      return;
-    }
     if (node->left != 0) {
+      os << node->datum << " ";
       traverse_inorder_impl(node->left, os);
-    }
-    os << node->datum << " ";
-    if (node->right != 0) {
       traverse_inorder_impl(node->right, os);
     }
   }
@@ -663,60 +593,6 @@ private:
   //       'less' parameter). Based on the result, you gain some information
   //       about where the element you're looking for could be.
   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
-
-    // Ryan's long ass code that definitely works:
-    /*if (node == nullptr || less(max_element_impl(node)->datum, val)) {
-      return nullptr;
-    }
-
-    if (node->right == nullptr && node->left == nullptr) {
-      if (!less(node->datum, val) && !less(val, node->datum)) {
-        return nullptr;
-      } else if (less(val, node->datum)) {
-        return node;
-      } else if (less(node->datum, val)) {
-        return nullptr;
-      }
-    }
-
-    if (node->right == nullptr) {
-      if (!less(node->datum, val) && !less(val, node->datum)) {
-        return nullptr;
-      } else if (less(val, node->datum)) {
-        return min_greater_than_impl(node->left, val, less);
-      } else if (less(node->datum, val)) {
-        return nullptr; 
-      }
-    }
-
-    if (node->left == nullptr) {
-      if (!less(node->datum, val) && !less(val, node->datum)) {
-        return min_greater_than_impl(node->right, val, less);
-      } else if (less(val, node->datum)) {
-        return node;
-      } else if (less(node->datum, val)) {
-        return min_greater_than_impl(node->right, val, less);
-      }
-    }
-
-    if (!less(node->datum, val) && !less(val, node->datum)) {
-      return min_greater_than_impl(node->right, val, less);
-    } else if (less(val, node->datum)) {
-      if (!less(max_element_impl(node->left)->datum, val) 
-      && !less(val, max_element_impl(node->left)->datum)) {
-        return node;
-      } else if (less(max_element_impl(node->left)->datum, val)) {
-        return node;
-      } else if (less(val, max_element_impl(node->left)->datum)) {
-        return min_greater_than_impl(node->left, val, less);
-      }
-    } else if (less(node->datum, val)) {
-      return min_greater_than_impl(node->right, val, less);
-    }
-
-    // Fix for "Control reaches end of non-void function" Error
-<<<<<<< HEAD
-    return nullptr; */
     return min_greater_than_impl_helper(node, val, less, nullptr);
   }
 
