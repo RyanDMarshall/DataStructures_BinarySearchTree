@@ -49,10 +49,24 @@ map<string, string> map_classifier(int& word_count, int& post_count) {
 
  		++post_count;
 
- 		all_word.append(" ");
- 		all_class.append(" ");
  		all_word.append(row["content"]);
  		all_class.append(row["tag"]);
+ 		all_word.append(" ");
+ 		all_class.append(" ");
+
+ 		set<basic_string<char> > current_content = unique_words(row["content"]);
+ 		set<basic_string<char> >::iterator current_iter = current_content.begin();
+
+ 		while (current_iter != current_content.end()) {
+
+ 			pair<string, string> insert_pair;
+ 			insert_pair.first = row["tag"];
+ 			insert_pair.second = *current_iter;
+
+ 			classifier.insert(insert_pair);
+
+ 			++current_iter;
+ 		}
 	}
 
 	total_word = unique_words(all_word);
@@ -61,21 +75,12 @@ map<string, string> map_classifier(int& word_count, int& post_count) {
   set<basic_string<char> >::iterator word_iter = total_word.begin();    
   set<basic_string<char> >::iterator classify_iter = total_class.begin();
 
-  while (word_iter != total_word.end()) {
-  	cout << *word_iter << endl;
-
-  	++word_iter;
-  }
-
-  cout << endl << endl;
-
-  while (classify_iter != total_class.end()) {
-  	cout << *classify_iter << endl << endl;
-
-  	++classify_iter;
-  }
-
 	word_count = total_word.size();
+
+	cout << endl << "Word Count = " << word_count 
+			 << endl << "Post Count = " << post_count; 
+
+	cout << endl << "Map Size = " << classifier.size() << endl;
 
 	return classifier;
 }
