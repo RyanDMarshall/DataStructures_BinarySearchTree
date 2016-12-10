@@ -2,16 +2,15 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
-#include "BinarySearchTree.h"
 #include "csvstream.h"
 #include "map"
 #include "set"
 
 using namespace std;
 
-map<string, int> map_counter();
+map<string, string> map_classifier(int& word_count, int& post_count);
+//map<string, double> map_probability(int word_count, int post_count);
 
-map<string, double> map_probability();
 
 set<string> unique_words(const string &str);
 
@@ -19,58 +18,75 @@ int main() {
 
     cout << setprecision(3);
 
-    map<string, double> probability_map = map_probability();
-
+    int word_count = 0;
+    int post_count = 0;
+    map<string, string> classifier = map_classifier(word_count, post_count);
 
     return 0;
 }
 
-map<string, int> map_counter() {
+map<string, string> map_classifier(int& word_count, int& post_count) {
 
-	// Make counter read in data from all files, 
-	// store every datum once, as well as how often they occur
-	map<string, int> counter;
+	map<string, string> classifier;
 
-    csvstream train_small("train_small.csv");
-    csvstream test_stream("test_small.csv", ',');
-    csvstream w16_projects_exam("w16_projects_exam.csv");
-    csvstream sp16_projects_exam("sp16_projects_exam.csv");
-    csvstream w14_f15_instructor_student("w14-f15_instructor_student.csv");
-    csvstream w16_instructor_student("w16_instructor_student.csv");
+  csvstream train_small("train_small.csv");
+  csvstream test_small("test_small.csv", ',');
+  csvstream w16_projects_exam("w16_projects_exam.csv");
+  csvstream sp16_projects_exam("sp16_projects_exam.csv");
+  csvstream w14_f15_instructor_student("w14-f15_instructor_student.csv");
+  csvstream w16_instructor_student("w16_instructor_student.csv");
 
  	csvstream::row_type row;
+
+ 	string all_word;
+ 	string all_class;
+
+ 	set<string> total_word;
+ 	set<string> total_class;
 	
- 	while (train_small >> row || test_stream >> row || w16_projects_exam >> row
- 	|| sp16_projects_exam >> row || w14_f15_instructor_student >> row 
- 	|| w16_instructor_student >> row) {
+ 	while (train_small >> row || test_small >> row 
+ 	|| w16_projects_exam >> row || sp16_projects_exam >> row) {
 
-      set<string> words = unique_words(row["content"]);
-      set<basic_string<char> >::iterator iter = words.begin();
+ 		++post_count;
 
-      while (iter != words.end()) {
+ 		all_word.append(" ");
+ 		all_class.append(" ");
+ 		all_word.append(row["content"]);
+ 		all_class.append(row["tag"]);
+	}
 
-      	//cout << *iter << endl;
+	total_word = unique_words(all_word);
+	total_class = unique_words(all_class);
 
-      	/*if ((counter.insert(iter)).second) {
-      		++(*(counter.find(*iter))).second;
-      	}*/
+  set<basic_string<char> >::iterator word_iter = total_word.begin();    
+  set<basic_string<char> >::iterator classify_iter = total_class.begin();
 
-      	++iter;
-      }
-	 }
+  while (word_iter != total_word.end()) {
+  	cout << *word_iter << endl;
 
-	//cout << endl << counter.size() << endl;
+  	++word_iter;
+  }
 
-    return counter;
+  cout << endl << endl;
+
+  while (classify_iter != total_class.end()) {
+  	cout << *classify_iter << endl << endl;
+
+  	++classify_iter;
+  }
+
+	word_count = total_word.size();
+
+	return classifier;
 }
 
-map<string, double> map_probability() {
+/*map<string, double> map_probability() {
 
 	map<string, int> counter = map_counter();
 	map<string, double> probability;
 
 	return probability;
-}
+}*/
 
 set<string> unique_words(const string &str) {
 
