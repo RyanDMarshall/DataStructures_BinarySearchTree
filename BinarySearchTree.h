@@ -519,7 +519,7 @@ private:
   static bool check_sorting_invariant_impl(const Node *node, Compare less) {
 
     if (empty_impl(node)) {
-      return true;
+      return true; 
     }
 
     if (node->left == nullptr && node->right == nullptr) {
@@ -568,14 +568,9 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#Pre-order
   //       for the definition of a pre-order traversal.
   static void traverse_preorder_impl(const Node *node, std::ostream &os) {
-    os << node->datum << " ";
-    if (empty_impl(node)) {
-      return;
-    }
-    if (node->left != 0) {
+    if (node != 0) {
+      os << node->datum << " ";
       traverse_preorder_impl(node->left, os);
-    }
-    if (node->right != 0) {
       traverse_preorder_impl(node->right, os);
     }
   }

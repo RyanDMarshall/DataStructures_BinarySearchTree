@@ -36,14 +36,14 @@ int main() {
     	post_count, calculator_count, euchre_count, exam_count, 
     	image_count, recursion_count, statistics_count);
 
-    /*cout << "Word Count = " << word_count << endl
-    		 << "Post Count = " << post_count << endl
-    		 << "Calculator Count = " << calculator_count << endl
-    		 << "Euchre Count = " << euchre_count << endl
-    		 << "Exam Count = " << exam_count << endl
-    		 << "Image Count = " << image_count << endl
-    		 << "Recursion Count = " << recursion_count << endl
-    		 << "Statistics Count = " << statistics_count << endl;*/
+    cout << "Word Count = " << word_count << endl
+    		 << "Post Count = " << post_count << endl;
+    		 // << "Calculator Count = " << calculator_count << endl
+    		 // << "Euchre Count = " << euchre_count << endl
+    		 // << "Exam Count = " << exam_count << endl
+    		 // << "Image Count = " << image_count << endl
+    		 // << "Recursion Count = " << recursion_count << endl
+    		 // << "Statistics Count = " << statistics_count << endl;
 
     		     return 0;
 }
