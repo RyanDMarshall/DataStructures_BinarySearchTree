@@ -115,7 +115,7 @@ public:
     return height_impl(root);
   }
 
-  // EFFECTS: Returns the number of elements in this BinarySearchTree.
+  // EFFECTS: Returns the number of elements in this BinarySearchrTree.
   size_t size() const {
     return static_cast<size_t>(size_impl(root));
   }
@@ -310,7 +310,6 @@ private:
   // NOTE:    This function must run in constant time.
   //          No iteration or recursion is allowed.
   static bool empty_impl(const Node *node) {
-
     return (node == nullptr);
   }
 
@@ -384,8 +383,7 @@ private:
 
   // EFFECTS: Frees the memory for all nodes used in the tree rooted at 'node'.
   // NOTE:    This function must be tree recursive.
-  static void destroy_nodes_impl(Node *node) {
-
+  static void destroy_nodes_impl(Node *node) { // Without access to root, this will result in dangling pointers.
     if (empty_impl(node)) {
       return;
     }
@@ -402,6 +400,7 @@ private:
       node = nullptr;
       return;
     }
+
   }
 
   // EFFECTS : Searches the tree rooted at 'node' for an element equivalent
@@ -554,9 +553,9 @@ private:
   //       See https://en.wikipedia.org/wiki/Tree_traversal#In-order
   //       for the definition of a in-order traversal.
   static void traverse_inorder_impl(const Node *node, std::ostream &os) {
-    if (node->left != 0) {
-      os << node->datum << " ";
+    if (node != 0) {
       traverse_inorder_impl(node->left, os);
+      os << node->datum << " ";
       traverse_inorder_impl(node->right, os);
     }
   }
@@ -574,12 +573,13 @@ private:
       return;
     }
     if (node->left != 0) {
-      traverse_inorder_impl(node->left, os);
+      traverse_preorder_impl(node->left, os);
     }
     if (node->right != 0) {
-      traverse_inorder_impl(node->right, os);
+      traverse_preorder_impl(node->right, os);
     }
   }
+
 
   // EFFECTS : Returns a pointer to the Node containing the smallest element
   //           in the tree rooted at 'node' that is greater than 'val'.
