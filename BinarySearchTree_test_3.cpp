@@ -53,6 +53,11 @@ void test_invariant() {
 	assert(tree.check_sorting_invariant());
 
 	BinarySearchTree<int>::Iterator iter = tree.begin();
+	iter++;
+	iter++;
+	*iter = 1;
+	cout << tree.to_string() << endl;
+	assert(!tree.check_sorting_invariant());
 
 	BinarySearchTree<int> tree2;
 	tree2.insert(10);
