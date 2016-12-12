@@ -18,7 +18,7 @@ set<string> unique_words(const string &str) {
 	return words;
 }
 
-// build a search map for each label, each leaf contains the word and its occurence
+// build a search map for each label, each data point contains the word and its occurence
 void build_map(map<string, int>& map, string content) {
 	set<basic_string<char>> input = unique_words(content);
 	set<basic_string<char>>::iterator iter = input.begin();
@@ -81,15 +81,7 @@ void trainer_by_subject(map<string, int> * all_map,
 		all_word.append(" ");
 		all_class.append(row["tag"]);
 		all_class.append(" ");
-		/*set<basic_string<char> > current_content = unique_words(row["content"]);
-		set<basic_string<char> >::iterator current_iter = current_content.begin();
-	 	while (current_iter != current_content.end()) {
- 			pair<string, string> insert_pair;
- 			insert_pair.first = *current_iter;
- 			insert_pair.second = row["tag"];
- 			classifier.insert(insert_pair);
- 			++current_iter;
- 		}*/
+
 	}
 	total_word = unique_words(all_word);
 	total_class = unique_words(all_class);
@@ -99,9 +91,9 @@ void trainer_by_subject(map<string, int> * all_map,
 	word_count += total_word.size();
 }
 
-void trainer_by_author(map<string, int> all_map[], int& word_count, 
+void trainer_by_author(map<string, int> * all_map, int& word_count, 
 	int& post_count, int& student_count, int& instructor_count,
-	char * train_file) {
+	char * train_file, int map_size) {
 	map<string, string> classifier;
 	string trainer(train_file);
 	csvstream trainer_stream(trainer);
@@ -113,25 +105,19 @@ void trainer_by_author(map<string, int> all_map[], int& word_count,
 	
  	while (trainer_stream >> row) {
  		++post_count;
- 		if (row["tag"] == "student") {
+ 		if (row["tag"] == "student") {	
+ 			build_map(*(all_map), row["content"]);
  			++student_count;
  		}
  		if (row["tag"] == "instructor") {
+ 			build_map(*(all_map + 1), row["content"]);
  			++instructor_count;
  		}
 		all_word.append(row["content"]);
 		all_class.append(row["tag"]);
 		all_word.append(" ");
 		all_class.append(" ");
-		set<basic_string<char> > current_content = unique_words(row["content"]);
-		set<basic_string<char> >::iterator current_iter = current_content.begin();
-	 	while (current_iter != current_content.end()) {
- 			pair<string, string> insert_pair;
- 			insert_pair.first = *current_iter;
- 			insert_pair.second = row["tag"];
- 			classifier.insert(insert_pair);
- 			++current_iter;
- 		}
+
 	}
 	total_word = unique_words(all_word);
 	total_class = unique_words(all_class);
@@ -141,11 +127,11 @@ void trainer_by_author(map<string, int> all_map[], int& word_count,
 }
 
 // This function counts the occurence of a word in all posts
-double word_occur(map<string, int> * all_map, string word) {
+double word_occur(map<string, int> * all_map, string word, int map_size) {
 	//cout << "the word is: " << word << endl;
 	double occurence = 0;
 	int count = 0;
-	while (count < 6) {
+	while (count < map_size) {
 		if ((all_map + count)->find(word) != (all_map + count)->end()) {
 			occurence += (all_map + count)->find(word)->second;
 		}
@@ -155,7 +141,9 @@ double word_occur(map<string, int> * all_map, string word) {
 	return occurence;
 }
 
-double probability_calc(string test_post, map<string, int> * all_map, int label_count, int total_post, int map_number) {
+// This function calculates the probablity of each word
+double probability_calc(string test_post, map<string, int> * all_map, int label_count, 
+	int total_post, int map_number, int map_size) {
 	double probability_calc = 0;
 	set<basic_string<char>> post = unique_words(test_post);
 	set<basic_string<char>>::iterator iter = post.begin();
@@ -165,11 +153,11 @@ double probability_calc(string test_post, map<string, int> * all_map, int label_
 		double top = 0;
 		double bottom = 0;
 		if ((all_map + map_number)->find(*iter) == (all_map + map_number)->end()) {
-			if (word_occur(map_ptr, *iter) == 0) {
+			if (word_occur(map_ptr, *iter, map_size) == 0) {
 				top = 1;
 			}
 			else {
-				top = word_occur(map_ptr, *iter);
+				top = word_occur(map_ptr, *iter, map_size);
 			}
 			bottom = total_post;
 		}
@@ -187,36 +175,43 @@ double probability_calc(string test_post, map<string, int> * all_map, int label_
 	return probability_calc;
 }
 
-string post_prediction(string test_post, map<string, int> * all_map, int calculator_count, 
+// This function predicts the result of each post 
+string post_prediction_subject(string test_post, map<string, int> * all_map, int calculator_count, 
 	int euchre_count, int exam_count, int image_count, int recursion_count, 
-	int statistics_count, int total_post) {
+	int statistics_count, int total_post, int map_size) {
 	int map_number = 0;
 	int i = 0;
-	double max_prob = probability_calc(test_post, all_map, calculator_count, total_post, i);
-	while(i < 6) {
+	double max_prob = probability_calc(test_post, all_map, calculator_count, 
+										total_post, i, map_size);
+	while(i < map_size) {
 		double prob;
 		if (i == 0) {
-			prob = probability_calc(test_post, all_map, calculator_count, total_post, i);
+			prob = max_prob;
 			//cout << "probability for calculator: " << prob << endl;
 		}
 		else if (i == 1) {
-			prob = probability_calc(test_post, all_map, euchre_count, total_post, i);
+			prob = probability_calc(test_post, all_map, euchre_count, 
+									total_post, i, map_size);
 			//cout << "probability for euchre: " << prob << endl;
 		}
 		else if (i == 2) {
-			prob = probability_calc(test_post, all_map, exam_count, total_post, i);
+			prob = probability_calc(test_post, all_map, exam_count, 
+									total_post, i, map_size);
 			//cout << "probability for exam: " << prob << endl;
 		}
 		else if (i == 3) {
-			prob = probability_calc(test_post, all_map, image_count, total_post, i);
+			prob = probability_calc(test_post, all_map, image_count, 
+									total_post, i, map_size);
 			//cout << "probability for image: " << prob << endl;
 		}
 		else if (i == 4) {
-			prob = probability_calc(test_post, all_map, recursion_count, total_post, i);
+			prob = probability_calc(test_post, all_map, recursion_count, 
+									total_post, i, map_size);
 			//cout << "probability for recursion: " << prob << endl;
 		}
 		else {
-			prob = probability_calc(test_post, all_map, statistics_count, total_post, i);
+			prob = probability_calc(test_post, all_map, statistics_count, 
+									total_post, i, map_size);
 			//cout << "probability for statistics: " << prob << endl;
 		}
 		if (prob > max_prob) {
@@ -247,10 +242,41 @@ string post_prediction(string test_post, map<string, int> * all_map, int calcula
 	}
 }
 
-int predict_label(map<string, int> * all_map, 
-	int word_count, int post_count, int calculator_count, 
-	int euchre_count, int exam_count, int image_count, 
-	int recursion_count, int statistics_count, int & test_post_count, char * test_file) {
+string post_prediction_author(string test_post, map<string, int> * all_map, int student_count, 
+	int instructor_count, int total_post, int map_size) {
+	int map_number = 0;
+	int i = 0;
+	double max_prob = probability_calc(test_post, all_map, student_count, 
+										total_post, i, map_size);
+	while(i < map_size) {
+		double prob;
+		if (i == 0) {
+			prob = max_prob;
+			//cout << "probability for student: " << prob << endl;
+		}
+		else {
+			prob = probability_calc(test_post, all_map, instructor_count, 
+									total_post, i, map_size);
+			//cout << "probability for instructor: " << prob << endl;
+		}
+		if (prob > max_prob) {
+			max_prob = prob;
+			map_number = i;
+		}
+		++i;
+	}
+	if (map_number == 0) {
+		return "student";
+	}
+	else {
+		return "instructor";
+	}
+}
+
+int predict_label(map<string, int> * all_map, int word_count, int post_count, 
+	int calculator_count, int euchre_count, int exam_count, int image_count, 
+	int recursion_count, int statistics_count, int student_count, int instructor_count, 
+	int & test_post_count, char * test_file, int map_size) {
 
 	int predict_correct = 0;
 	string tester(test_file);
@@ -261,9 +287,17 @@ int predict_label(map<string, int> * all_map,
  		test_post_count++;
  		string predict_label;
  		cout << "  correct = " << row["tag"] << ", predicted = ";
- 		predict_label =  post_prediction(row["content"], all_map, calculator_count, 
- 				euchre_count, exam_count, image_count, recursion_count,
- 				statistics_count, post_count);
+
+ 		if (map_size == 6) {
+	 		predict_label = post_prediction_subject(row["content"], all_map, calculator_count, 
+	 						euchre_count, exam_count, image_count, recursion_count,
+	 						statistics_count, post_count, map_size);
+	 	}
+	 	else {
+	 		predict_label = post_prediction_author(row["content"], all_map, student_count, 
+	 						instructor_count, post_count, map_size);
+	 	}
+
  		cout << predict_label << endl;
 
  		if (row["tag"] == predict_label) {
@@ -275,42 +309,10 @@ int predict_label(map<string, int> * all_map,
  	return predict_correct;
 }
 
-/*double probability_by_author(string word, int word_count, int post_count, 
-    	int student_count, int instructor_count) {
-	double probability_calc = 0;
-	return probability_calc;
-}*/
-
-/*int word_counter_given_label(string word, string label) {
-	int word_counter = 0;
-	csvstream w14_f15_instructor_student("w14-f15_instructor_student.csv");
-	csvstream w16_projects_exam("w16_projects_exam.csv");
- 	csvstream::row_type row;
- 	set<string> current_string;
-	while (w14_f15_instructor_student >> row || w16_projects_exam >> row) {
-		if (row["tag"] == label) {
-			current_string = unique_words(row["content"]);
-			if (current_string.find(word) != current_string.end()) {
-				++word_counter;
-			}
-		}
-	}
-	return word_counter;
-}
-
-int total_word_counter(string word) {
-	int total_count = 0;
-	vector<string> labels = {"students", "instructors", "calculator", 
-	"euchre", "exam", "image", "recursion", "statistics"};
-	for (int i = 0; i < int(labels.size()); ++i) {
-		total_count += word_counter_given_label(word, labels.at(i));
-	}
-	return total_count;
-}*/
-
 int main(int argc, char **argv) {
 
 	char *train_file, *test_file, *debug;
+	bool is_debug = false;
 
 	if (argc == 4 || argc == 3) {
 		train_file = *(argv + 1);
@@ -322,6 +324,9 @@ int main(int argc, char **argv) {
 				cout << "Usage: main TRAIN_FILE TEST_FILE [--debug]" << endl;
 				exit(EXIT_FAILURE);
 			}
+			else {
+				is_debug = true;
+			}
 		}
 		// Do debug stuff like you should
 	}
@@ -331,6 +336,7 @@ int main(int argc, char **argv) {
 	}
 
 	cout << setprecision(3);
+
 	int word_count = 0;
 	int post_count = 0;
 	int test_post_count = 0;
@@ -343,66 +349,47 @@ int main(int argc, char **argv) {
 	int student_count = 0;
 	int instructor_count = 0;
 	int predict_correct = 0;
+	int all_map_size = 0;
 
 	// create a set of map
-	map<string, int> exam, stats, image, euchre, calculator, recursion;
-	map<string, int> temp[] = {calculator, euchre, exam, image, recursion, stats};
+	map<string, int> exam, stats, image, euchre, calculator, recursion, instructor, student;
+	map<string, int> temp_subject[] = {calculator, euchre, exam, image, recursion, stats};
+	map<string, int> temp_author[] = {student, instructor};
 	map<string, int> * all_map;
-	all_map = temp;
 
 	string trainer(train_file);
-	string instructor = "instructor";
-	string student = "student";
+	string instructor_string = "instructor";
+	string student_string = "student";
 
-	if (trainer.find(instructor) != string::npos || trainer.find(student) != string::npos) {
-		cout << "author" << endl;
-		/*trainer_by_author(all_map, word_count,
-		post_count, student_count, instructor_count, train_file);*/
+	if (trainer.find(instructor_string) != string::npos || trainer.find(student_string) != string::npos) {
+		all_map = temp_author;
+		all_map_size = 2;
+		trainer_by_author(all_map, word_count,
+		post_count, student_count, instructor_count, train_file, all_map_size);
+
+		cout << "trained on " << post_count << " examples" << endl << endl << "test data:" << endl;
+
+		predict_correct = predict_label(all_map, word_count, post_count, calculator_count, 
+		euchre_count, exam_count, image_count, recursion_count, statistics_count, student_count,
+		instructor_count, test_post_count, test_file, all_map_size);
 	}
 	else {
+		all_map = temp_subject;
+		all_map_size = 6;
 		trainer_by_subject(all_map, word_count, post_count, calculator_count, 
 		euchre_count, exam_count, image_count, recursion_count, statistics_count, 
 		train_file);
+
 		cout << "trained on " << post_count << " examples" << endl << endl << "test data:" << endl;
+
 		predict_correct = predict_label(all_map, word_count, post_count, calculator_count, 
-		euchre_count, exam_count, image_count, recursion_count, statistics_count, 
-		test_post_count, test_file);
+		euchre_count, exam_count, image_count, recursion_count, statistics_count, student_count,
+		instructor_count, test_post_count, test_file, all_map_size);
 
 	}
 
 	cout << "performance: " << predict_correct << " / " << test_post_count 
 	<< " documents predicted correctly" << endl << endl;
-
-
-		/*string word_test, label_test;
-		cout << "Enter a word, dumbass:" << endl;
-		cin >> word_test;
-		cout << "Enter a god Damn label" << endl;
-		cin >> label_test;
-
-		double prob_by_subject = 0;
-		double prob_by_author = 0;
-
-		prob_by_subject = probability_by_subject(word_test, word_count_by_subject,
-			post_count_by_subject, calculator_count, euchre_count, exam_count, image_count, 
-			recursion_count, statistics_count);
-
-		prob_by_author = probability_by_author(word_test, word_count_by_author,
-		  post_count_by_author, student_count, instructor_count);*/
-
-	/*cout << "Word Count = " << word_count << endl
-			 << "Post Count = " << post_count << endl
-			 << "Calculator Count = " << calculator_count << endl
-			 << "Euchre Count = " << euchre_count << endl
-			 << "Exam Count = " << exam_count << endl
-			 << "Image Count = " << image_count << endl
-			 << "Recursion Count = " << recursion_count << endl
-			 << "Statistics Count = " << statistics_count << endl
-			 << "Student Count = " << student_count << endl
-			 << "Instructor Count = " << instructor_count << endl
-			 << "Word Count Given Label = " << word_counter_given_label(word_test, label_test) << endl
-			 << "Total Word Count = " << total_word_counter(word_test) << endl
-			 << "Probability by subject = " << prob_by_subject << endl
-			 << "Probability by author = " << prob_by_author << endl;*/
+	
 	return 0;
 }
