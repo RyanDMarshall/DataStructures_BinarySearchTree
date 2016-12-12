@@ -32,15 +32,121 @@ void build_map(map<string, int>& map, string content) {
 		else {
 			map.find(*iter)->second += 1;
 		}
-		//cout << "the word: " << map.find(*iter)->first << ", value: " << map.find(*iter)->second << endl;
 		++iter;
 	}
+}
+
+string print_class_name(int i, int map_size) {
+	if (map_size == 2) {
+		if (i == 0) {
+			return "instructor";
+		}
+		else {
+			return "student";
+		}
+	}
+	else {
+		if (i == 0) {
+			return "calculator";
+		}
+		else if (i == 1) {
+			return "euchre";
+		}
+		else if (i == 2) {
+			return "exam";
+		}
+		else if (i == 3) {
+			return "image";
+		}
+		else if (i == 4) {
+			return "recursion";
+		}
+		else {
+			return "statistics";
+		}
+	}
+}
+
+int print_post_amount(int i, int map_size, int post_count,
+	int calculator_count, int euchre_count, int exam_count, int image_count, int recursion_count,
+	int statistics_count, int student_count, int instructor_count) {
+	if (map_size == 2) {
+		if (i == 0) {
+			return instructor_count;
+		}
+		else {
+			return student_count;
+		}
+	}
+	else {
+		if (i == 0) {
+			return calculator_count;
+		}
+		else if (i == 1) {
+			return euchre_count;
+		}
+		else if (i == 2) {
+			return exam_count;
+		}
+		else if (i == 3) {
+			return image_count;
+		}
+		else if (i == 4) {
+			return recursion_count;
+		}
+		else {
+			return statistics_count;
+		}
+	}
+}
+
+void print_debug_class(map<string, int> * all_map, int map_size, int post_count,
+	int calculator_count, int euchre_count, int exam_count, int image_count, int recursion_count,
+	int statistics_count, int student_count, int instructor_count) {
+	int i = 0;
+	cout <<  "classes:" << endl;
+
+	while (i < map_size) {
+		if ((all_map + i)->begin() != (all_map + i)->end()) {
+
+			int label_count = print_post_amount(i, map_size, post_count, calculator_count, 
+												euchre_count, exam_count, image_count, 
+												recursion_count, statistics_count, 
+												student_count, instructor_count);
+
+			double log_prob = log(double(label_count) / double(post_count));
+			cout << print_class_name(i, map_size) << ", " << label_count 
+			<< " examples, log-prior = " << log_prob << endl;
+		}
+		++i;
+	}
+	cout << "classifier parameters:" << endl;
+	i = 0;
+	while (i < map_size) {
+		if ((all_map + i)->begin() != (all_map + i)->end()) {
+			map<string, int>::iterator iter = (all_map + i)->begin();
+
+			int label_count = print_post_amount(i, map_size, post_count, calculator_count, 
+												euchre_count, exam_count, image_count, 
+												recursion_count, statistics_count, 
+												student_count, instructor_count);
+
+			for (unsigned int j = 0; j < (all_map + i)->size(); ++j) {
+				cout << "  " << print_class_name(i, map_size) << ":" << iter->first;
+				cout << ", count = " << iter->second << ", log-likelihood = ";
+				cout << log(double(iter->second) / double(label_count)) << endl;
+				++iter;
+			}
+		}
+		++i;
+	}
+	cout << endl;
 }
 
 void trainer_by_subject(map<string, int> * all_map, 
 	int& word_count, int& post_count, int& calculator_count, 
 	int& euchre_count, int& exam_count, int& image_count, 
-	int& recursion_count, int& statistics_count, char * train_file) {
+	int& recursion_count, int& statistics_count, char * train_file, bool is_debug) {
 
 	map<string, string> classifier;
 	string trainer(train_file);
@@ -50,9 +156,19 @@ void trainer_by_subject(map<string, int> * all_map,
  	string all_class;
  	set<string> total_word;
  	set<string> total_class;
+
+ 	if (is_debug) {
+ 		cout << "training data:" << endl;
+ 	}
 	
  	while (trainer_stream >> row) {
  		++post_count;
+
+ 		if (is_debug) {
+ 			cout << "  label = " << row["tag"];
+ 			cout << ", content = " << row["content"] << endl;
+ 		}
+
  		if (row["tag"] == "calculator") {
  			++calculator_count;
  			build_map(*(all_map), row["content"]);
@@ -81,19 +197,20 @@ void trainer_by_subject(map<string, int> * all_map,
 		all_word.append(" ");
 		all_class.append(row["tag"]);
 		all_class.append(" ");
-
 	}
 	total_word = unique_words(all_word);
 	total_class = unique_words(all_class);
-	//What does this two line do
- 	set<basic_string<char> >::iterator word_iter = total_word.begin();    
- 	set<basic_string<char> >::iterator classify_iter = total_class.begin();
+
+	if (is_debug) {
+		cout << "trained on " << post_count << " examples" << endl;
+		cout << "vocabulary size = " << total_word.size() << endl << endl;
+	}
 	word_count += total_word.size();
 }
 
 void trainer_by_author(map<string, int> * all_map, int& word_count, 
 	int& post_count, int& student_count, int& instructor_count,
-	char * train_file, int map_size) {
+	char * train_file, int map_size, bool is_debug) {
 	map<string, string> classifier;
 	string trainer(train_file);
 	csvstream trainer_stream(trainer);
@@ -102,16 +219,26 @@ void trainer_by_author(map<string, int> * all_map, int& word_count,
  	string all_class;
  	set<string> total_word;
  	set<string> total_class;
+
+ 	if (is_debug) {
+ 		cout << "training data:" << endl;
+ 	}
 	
  	while (trainer_stream >> row) {
- 		++post_count;
- 		if (row["tag"] == "student") {	
- 			build_map(*(all_map), row["content"]);
- 			++student_count;
+
+ 		if (is_debug) {
+ 			cout << "  label = " << row["tag"];
+ 			cout << ", content = " << row["content"] << endl;
  		}
- 		if (row["tag"] == "instructor") {
- 			build_map(*(all_map + 1), row["content"]);
+
+ 		++post_count;
+ 		if (row["tag"] == "instructor") {	
+ 			build_map(*(all_map), row["content"]);
  			++instructor_count;
+ 		}
+ 		if (row["tag"] == "student") {
+ 			build_map(*(all_map + 1), row["content"]);
+ 			++student_count;
  		}
 		all_word.append(row["content"]);
 		all_class.append(row["tag"]);
@@ -119,10 +246,15 @@ void trainer_by_author(map<string, int> * all_map, int& word_count,
 		all_class.append(" ");
 
 	}
+
 	total_word = unique_words(all_word);
 	total_class = unique_words(all_class);
-	set<basic_string<char> >::iterator word_iter = total_word.begin();    
- 	set<basic_string<char> >::iterator classify_iter = total_class.begin();
+
+	if (is_debug) {
+		cout << "trained on " << post_count << " examples" << endl;
+		cout << "vocabulary size = " << total_word.size() << endl << endl;
+	}
+
 	word_count += total_word.size();
 }
 
@@ -142,6 +274,7 @@ double word_occur(map<string, int> * all_map, string word, int map_size) {
 }
 
 // This function calculates the probablity of each word
+// Calls: word_occur
 double probability_calc(string test_post, map<string, int> * all_map, int label_count, 
 	int total_post, int map_number, int map_size) {
 	double probability_calc = 0;
@@ -175,7 +308,8 @@ double probability_calc(string test_post, map<string, int> * all_map, int label_
 	return probability_calc;
 }
 
-// This function predicts the result of each post 
+// This function calculates the result of each label (subject based)
+// Calls: probability_calc
 string post_prediction_subject(string test_post, map<string, int> * all_map, int calculator_count, 
 	int euchre_count, int exam_count, int image_count, int recursion_count, 
 	int statistics_count, int total_post, int map_size) {
@@ -187,32 +321,26 @@ string post_prediction_subject(string test_post, map<string, int> * all_map, int
 		double prob;
 		if (i == 0) {
 			prob = max_prob;
-			//cout << "probability for calculator: " << prob << endl;
 		}
 		else if (i == 1) {
 			prob = probability_calc(test_post, all_map, euchre_count, 
 									total_post, i, map_size);
-			//cout << "probability for euchre: " << prob << endl;
 		}
 		else if (i == 2) {
 			prob = probability_calc(test_post, all_map, exam_count, 
 									total_post, i, map_size);
-			//cout << "probability for exam: " << prob << endl;
 		}
 		else if (i == 3) {
 			prob = probability_calc(test_post, all_map, image_count, 
 									total_post, i, map_size);
-			//cout << "probability for image: " << prob << endl;
 		}
 		else if (i == 4) {
 			prob = probability_calc(test_post, all_map, recursion_count, 
 									total_post, i, map_size);
-			//cout << "probability for recursion: " << prob << endl;
 		}
 		else {
 			prob = probability_calc(test_post, all_map, statistics_count, 
 									total_post, i, map_size);
-			//cout << "probability for statistics: " << prob << endl;
 		}
 		if (prob > max_prob) {
 			max_prob = prob;
@@ -242,23 +370,25 @@ string post_prediction_subject(string test_post, map<string, int> * all_map, int
 	}
 }
 
+// This function calculates the result of each label (author based)
+// Calls: probability_calc
 string post_prediction_author(string test_post, map<string, int> * all_map, int student_count, 
 	int instructor_count, int total_post, int map_size) {
 	int map_number = 0;
 	int i = 0;
-	double max_prob = probability_calc(test_post, all_map, student_count, 
-										total_post, i, map_size);
+	double max_prob = probability_calc(test_post, all_map, instructor_count, 
+									total_post, i, map_size);
 	while(i < map_size) {
 		double prob;
 		if (i == 0) {
 			prob = max_prob;
-			//cout << "probability for student: " << prob << endl;
 		}
 		else {
-			prob = probability_calc(test_post, all_map, instructor_count, 
-									total_post, i, map_size);
-			//cout << "probability for instructor: " << prob << endl;
+			prob = probability_calc(test_post, all_map, student_count, 
+										total_post, i, map_size);;
 		}
+
+		// instructor comes before student, so prob >= max_prob
 		if (prob > max_prob) {
 			max_prob = prob;
 			map_number = i;
@@ -266,13 +396,15 @@ string post_prediction_author(string test_post, map<string, int> * all_map, int 
 		++i;
 	}
 	if (map_number == 0) {
-		return "student";
+		return "instructor";
 	}
 	else {
-		return "instructor";
+		return "student";
 	}
 }
 
+// This function calculates the probabilty of each label and predict the result
+// Calls: post_prediction_subject, post_prediction_author
 int predict_label(map<string, int> * all_map, int word_count, int post_count, 
 	int calculator_count, int euchre_count, int exam_count, int image_count, 
 	int recursion_count, int statistics_count, int student_count, int instructor_count, 
@@ -354,7 +486,7 @@ int main(int argc, char **argv) {
 	// create a set of map
 	map<string, int> exam, stats, image, euchre, calculator, recursion, instructor, student;
 	map<string, int> temp_subject[] = {calculator, euchre, exam, image, recursion, stats};
-	map<string, int> temp_author[] = {student, instructor};
+	map<string, int> temp_author[] = {instructor, student};
 	map<string, int> * all_map;
 
 	string trainer(train_file);
@@ -364,10 +496,19 @@ int main(int argc, char **argv) {
 	if (trainer.find(instructor_string) != string::npos || trainer.find(student_string) != string::npos) {
 		all_map = temp_author;
 		all_map_size = 2;
-		trainer_by_author(all_map, word_count,
-		post_count, student_count, instructor_count, train_file, all_map_size);
+		trainer_by_author(all_map, word_count, post_count, student_count, 
+						instructor_count, train_file, all_map_size, is_debug);
 
-		cout << "trained on " << post_count << " examples" << endl << endl << "test data:" << endl;
+		if(!is_debug) {
+			cout << "trained on " << post_count << " examples" << endl << endl;
+		}
+		else {
+			print_debug_class(all_map, all_map_size, post_count, calculator_count, euchre_count, 
+							exam_count, image_count, recursion_count, statistics_count, 
+							student_count, instructor_count);
+		}
+
+		cout << "test data:" << endl;
 
 		predict_correct = predict_label(all_map, word_count, post_count, calculator_count, 
 		euchre_count, exam_count, image_count, recursion_count, statistics_count, student_count,
@@ -378,9 +519,17 @@ int main(int argc, char **argv) {
 		all_map_size = 6;
 		trainer_by_subject(all_map, word_count, post_count, calculator_count, 
 		euchre_count, exam_count, image_count, recursion_count, statistics_count, 
-		train_file);
+		train_file, is_debug);
 
-		cout << "trained on " << post_count << " examples" << endl << endl << "test data:" << endl;
+		if(!is_debug) {
+			cout << "trained on " << post_count << " examples" << endl << endl;
+		}
+		else {
+			print_debug_class(all_map, all_map_size, post_count, calculator_count, euchre_count, 
+							exam_count, image_count, recursion_count, statistics_count, 
+							student_count, instructor_count);
+		}
+		cout << "test data:" << endl;
 
 		predict_correct = predict_label(all_map, word_count, post_count, calculator_count, 
 		euchre_count, exam_count, image_count, recursion_count, statistics_count, student_count,
@@ -389,7 +538,7 @@ int main(int argc, char **argv) {
 	}
 
 	cout << "performance: " << predict_correct << " / " << test_post_count 
-	<< " documents predicted correctly" << endl << endl;
-	
+	<< " documents predicted correctly" << endl;
+
 	return 0;
 }

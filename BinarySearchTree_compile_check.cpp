@@ -143,5 +143,6 @@ int main() {
   BinarySearchTree<Duck, DuckWealthLess>::Iterator duck_it_copy(const_duck_it);
 
   cout << b << i << st << s << endl;
+  cout << *it_copy << (*duck_it_copy).getWealth() << endl;
  
 }

@@ -8,7 +8,7 @@ void test_invariant();
 
 int main() {
 	test_traverse();
-	test_invariant();
+	//test_invariant();
 }
 
 void test_traverse() {
@@ -56,7 +56,6 @@ void test_invariant() {
 	iter++;
 	iter++;
 	*iter = 1;
-	cout << tree.to_string() << endl;
 	assert(!tree.check_sorting_invariant());
 
 	BinarySearchTree<int> tree2;
@@ -73,8 +72,47 @@ void test_invariant() {
 	tree2.insert(13);
 	tree2.insert(19);
 	tree2.insert(18);
-	assert(tree2.check_sorting_invariant());
 
-	cout << "test_traverse PASS!" << endl;
+	iter = tree2.begin();
+
+	iter++++;
+	*iter = 1;
+	assert(!tree2.check_sorting_invariant());
+	*iter = 3;
+	iter++;
+	*iter = 22;
+	assert(!tree2.check_sorting_invariant());
+	*iter = 6;
+	assert(tree2.check_sorting_invariant());
+	iter++;
+	iter++;
+	iter++;
+	*iter = 4;
+	assert(!tree2.check_sorting_invariant());
+	*iter = 9;
+	assert(tree2.check_sorting_invariant());
+	iter++;
+	iter++;
+	*iter = 17;
+	assert(!tree2.check_sorting_invariant());
+	*iter = 12;
+	for (int i = 0; i < 5; ++i) {
+		iter++;
+	}
+	*iter = 17;
+	cout << tree2.to_string() << endl;
+	//assert(!tree2.check_sorting_invariant());
+
+	BinarySearchTree<int> test;
+	test.insert(3);
+	test.insert(2);
+	iter = test.begin();
+	iter++;
+	*iter = 1;
+	cout << test.to_string() << endl;
+	assert(!test.check_sorting_invariant());
+
+
+	cout << "test_invariant PASS!" << endl;
 
 }
