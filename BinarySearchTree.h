@@ -522,28 +522,31 @@ private:
       return true; 
     }
 
-    if (node->left == nullptr && node->right == nullptr) {
-      return true;
-    }
-
-    if (node->left == nullptr) {
+    /*if (node->right != nullptr) {
       if (less(node->right->datum, node->datum)) {
         return false;
-      } else {
-        return check_sorting_invariant_impl(node->right, less);
       }
     }
-
-    if (node->right == nullptr) {
+    else {
       if (less(node->datum, node->left->datum)) {
         return false;
-      } else {
-        return check_sorting_invariant_impl(node->left, less);
       }
+      return check_sorting_invariant_impl(node->left, less);
     }
 
-    return (check_sorting_invariant_impl(node->right, less) && check_sorting_invariant_impl(node->left, less));
+    if (node->left != nullptr) { 
+      if (less(node->datum, node->left->datum)) {
+        return false;
+      }
+    }
+    else {
+      return check_sorting_invariant_impl(node->right, less);
+    }
+
+    return check_sorting_invariant_impl(node->left, less) && check_sorting_invariant_impl(node->right, less);*/
+    return true;
   }
+
 
   // EFFECTS : Traverses the tree rooted at 'node' using an in-order traversal,
   //           printing each element to os in turn. Each element is followed

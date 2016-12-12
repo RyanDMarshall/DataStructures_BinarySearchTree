@@ -3,7 +3,7 @@
 debug_or_optimize = -O1
 
 CXX = g++
-CXXFLAGS = -Wall -pedantic --std=c++11 $(debug_or_optimize)
+CXXFLAGS = -Wall -Werror -pedantic --std=c++11 $(debug_or_optimize)
 
 tree_test_srcs = $(wildcard BinarySearchTree_test*.cpp)
 tree_test_exes = $(tree_test_srcs:.cpp=.exe)

@@ -39,10 +39,10 @@ void build_map(map<string, int>& map, string content) {
 string print_class_name(int i, int map_size) {
 	if (map_size == 2) {
 		if (i == 0) {
-			return "instructor";
+			return "student";
 		}
 		else {
-			return "student";
+			return "instructor";
 		}
 	}
 	else {
@@ -72,10 +72,10 @@ int print_post_amount(int i, int map_size, int post_count,
 	int statistics_count, int student_count, int instructor_count) {
 	if (map_size == 2) {
 		if (i == 0) {
-			return instructor_count;
+			return student_count;
 		}
 		else {
-			return student_count;
+			return instructor_count;
 		}
 	}
 	else {
@@ -232,13 +232,13 @@ void trainer_by_author(map<string, int> * all_map, int& word_count,
  		}
 
  		++post_count;
- 		if (row["tag"] == "instructor") {	
+ 		if (row["tag"] == "student") {	
  			build_map(*(all_map), row["content"]);
- 			++instructor_count;
- 		}
- 		if (row["tag"] == "student") {
- 			build_map(*(all_map + 1), row["content"]);
  			++student_count;
+ 		}
+ 		if (row["tag"] == "instructor") {
+ 			build_map(*(all_map + 1), row["content"]);
+ 			++instructor_count;
  		}
 		all_word.append(row["content"]);
 		all_class.append(row["tag"]);
@@ -376,30 +376,30 @@ string post_prediction_author(string test_post, map<string, int> * all_map, int 
 	int instructor_count, int total_post, int map_size) {
 	int map_number = 0;
 	int i = 0;
-	double max_prob = probability_calc(test_post, all_map, instructor_count, 
-									total_post, i, map_size);
+	double max_prob = probability_calc(test_post, all_map, student_count, 
+										total_post, i, map_size);
 	while(i < map_size) {
 		double prob;
 		if (i == 0) {
 			prob = max_prob;
 		}
 		else {
-			prob = probability_calc(test_post, all_map, student_count, 
-										total_post, i, map_size);;
+			prob = probability_calc(test_post, all_map, instructor_count, 
+									total_post, i, map_size);
 		}
 
 		// instructor comes before student, so prob >= max_prob
-		if (prob > max_prob) {
+		if (prob >= max_prob) {
 			max_prob = prob;
 			map_number = i;
 		}
 		++i;
 	}
 	if (map_number == 0) {
-		return "instructor";
+		return "student";
 	}
 	else {
-		return "student";
+		return "instructor";
 	}
 }
 
@@ -486,7 +486,7 @@ int main(int argc, char **argv) {
 	// create a set of map
 	map<string, int> exam, stats, image, euchre, calculator, recursion, instructor, student;
 	map<string, int> temp_subject[] = {calculator, euchre, exam, image, recursion, stats};
-	map<string, int> temp_author[] = {instructor, student};
+	map<string, int> temp_author[] = {student, instructor};
 	map<string, int> * all_map;
 
 	string trainer(train_file);
