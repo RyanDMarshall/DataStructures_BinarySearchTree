@@ -143,6 +143,8 @@ void print_debug_class(map<string, int> * all_map, int map_size, int post_count,
 	cout << endl;
 }
 
+// 
+// Calls: build_map
 void trainer_by_subject(map<string, int> * all_map, 
 	int& word_count, int& post_count, int& calculator_count, 
 	int& euchre_count, int& exam_count, int& image_count, 

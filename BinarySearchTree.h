@@ -518,33 +518,36 @@ private:
   // NOTE:    This function must be tree recursive.
   static bool check_sorting_invariant_impl(const Node *node, Compare less) {
 
-    if (empty_impl(node)) {
-      return true; 
+    return check_sorting_invariant_helper(node, nullptr, nullptr, less);
+  }
+
+  static bool check_sorting_invariant_helper(const Node *node, const Node * min, const Node * max, Compare less) {
+    if (node == nullptr) {
+      return true;
     }
 
-    /*if (node->right != nullptr) {
-      if (less(node->right->datum, node->datum)) {
+    if (min == nullptr && max == nullptr) {
+      return check_sorting_invariant_helper(node->left, min, node, less) &&
+           check_sorting_invariant_helper(node->right, node, max, less);
+    }
+    else if (min == nullptr) {
+      if (less(max->datum, node->datum)) {
+        return false;
+      }
+    }
+    else if (max == nullptr) {
+      if (less(node->datum, min->datum)) {
         return false;
       }
     }
     else {
-      if (less(node->datum, node->left->datum)) {
-        return false;
-      }
-      return check_sorting_invariant_impl(node->left, less);
-    }
-
-    if (node->left != nullptr) { 
-      if (less(node->datum, node->left->datum)) {
-        return false;
+      if (less(node->datum, min->datum) || less(max->datum, node->datum)) {
+      return false;
       }
     }
-    else {
-      return check_sorting_invariant_impl(node->right, less);
-    }
 
-    return check_sorting_invariant_impl(node->left, less) && check_sorting_invariant_impl(node->right, less);*/
-    return true;
+    return check_sorting_invariant_helper(node->left, min, node, less) &&
+           check_sorting_invariant_helper(node->right, node, max, less);
   }
 
 
@@ -591,6 +594,7 @@ private:
   //       'less' parameter). Based on the result, you gain some information
   //       about where the element you're looking for could be.
   static Node * min_greater_than_impl(Node *node, const T &val, Compare less) {
+
     return min_greater_than_impl_helper(node, val, less, nullptr);
   }
 
