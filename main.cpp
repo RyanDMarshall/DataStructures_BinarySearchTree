@@ -18,7 +18,7 @@ set<string> unique_words(const string &str) {
 	return words;
 }
 
-// build a search map for each label, each data point contains the word and its occurence
+// Effect: Build a search map for each label, each data point contains the word and its occurence
 void build_map(map<string, int>& map, string content) {
 	set<basic_string<char>> input = unique_words(content);
 	set<basic_string<char>>::iterator iter = input.begin();
@@ -36,6 +36,7 @@ void build_map(map<string, int>& map, string content) {
 	}
 }
 
+// Effect: Print out the name of the label when debugging
 string print_class_name(int i, int map_size) {
 	if (map_size == 2) {
 		if (i == 0) {
@@ -67,6 +68,7 @@ string print_class_name(int i, int map_size) {
 	}
 }
 
+// Effect: Return the amount of post with a certain label when debugging
 int print_post_amount(int i, int map_size, int post_count,
 	int calculator_count, int euchre_count, int exam_count, int image_count, int recursion_count,
 	int statistics_count, int student_count, int instructor_count) {
@@ -100,6 +102,8 @@ int print_post_amount(int i, int map_size, int post_count,
 	}
 }
 
+// Effect: Output the debugging information when --debug is in the command
+// Calls: print_class_name, print_post_amount
 void print_debug_class(map<string, int> * all_map, int map_size, int post_count,
 	int calculator_count, int euchre_count, int exam_count, int image_count, int recursion_count,
 	int statistics_count, int student_count, int instructor_count) {
@@ -143,7 +147,7 @@ void print_debug_class(map<string, int> * all_map, int map_size, int post_count,
 	cout << endl;
 }
 
-// 
+// Effect: Take in tester file and build a map according to its label (topic based)
 // Calls: build_map
 void trainer_by_subject(map<string, int> * all_map, 
 	int& word_count, int& post_count, int& calculator_count, 
@@ -210,6 +214,8 @@ void trainer_by_subject(map<string, int> * all_map,
 	word_count += total_word.size();
 }
 
+// Effect: Take in tester file and build a map according to its label (author based)
+// Calls: build_map
 void trainer_by_author(map<string, int> * all_map, int& word_count, 
 	int& post_count, int& student_count, int& instructor_count,
 	char * train_file, int map_size, bool is_debug) {
@@ -260,7 +266,7 @@ void trainer_by_author(map<string, int> * all_map, int& word_count,
 	word_count += total_word.size();
 }
 
-// This function counts the occurence of a word in all posts
+// Effect: Counts the occurence of a word in all posts
 double word_occur(map<string, int> * all_map, string word, int map_size) {
 	//cout << "the word is: " << word << endl;
 	double occurence = 0;
@@ -275,7 +281,7 @@ double word_occur(map<string, int> * all_map, string word, int map_size) {
 	return occurence;
 }
 
-// This function calculates the probablity of each word
+// Effect: Calculates the probablity of each word
 // Calls: word_occur
 double probability_calc(string test_post, map<string, int> * all_map, int label_count, 
 	int total_post, int map_number, int map_size) {
@@ -310,7 +316,7 @@ double probability_calc(string test_post, map<string, int> * all_map, int label_
 	return probability_calc;
 }
 
-// This function calculates the result of each label (subject based)
+// Effect: Calculates the result of each label (subject based)
 // Calls: probability_calc
 string post_prediction_subject(string test_post, map<string, int> * all_map, int calculator_count, 
 	int euchre_count, int exam_count, int image_count, int recursion_count, 
@@ -372,7 +378,7 @@ string post_prediction_subject(string test_post, map<string, int> * all_map, int
 	}
 }
 
-// This function calculates the result of each label (author based)
+// Effect: Calculates the result of each label (author based)
 // Calls: probability_calc
 string post_prediction_author(string test_post, map<string, int> * all_map, int student_count, 
 	int instructor_count, int total_post, int map_size) {
@@ -405,7 +411,7 @@ string post_prediction_author(string test_post, map<string, int> * all_map, int 
 	}
 }
 
-// This function calculates the probabilty of each label and predict the result
+// Effect: Calculates the probabilty of each label and predict the result
 // Calls: post_prediction_subject, post_prediction_author
 int predict_label(map<string, int> * all_map, int word_count, int post_count, 
 	int calculator_count, int euchre_count, int exam_count, int image_count, 
