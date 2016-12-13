@@ -60,11 +60,13 @@ void test_iterator_operators_begin_end() {
 
 	assert(*large_front == 1);
 	assert(*(++large_front) == 2);
-	assert(*(large_front++) == 3);
-	assert(*(++large_front++) == 5);
+	large_front++;
+	assert(*large_front == 3);
+	++large_front;
+	assert(*large_front == 4);
 
-	++++++++++large_front;
-	assert(large_front == large_end());
+	++++++++++++large_front;
+	assert(large_front == large_back);
 
 	large_front = BST_large.begin();
 	BinarySearchTree<int>::Iterator large_front_temp = BST_large.begin();
@@ -92,10 +94,13 @@ void test_iterator_operators_begin_end() {
 		BST_less_than_one.insert(i);
 	}
 
-	assert(BST_empty_two.begin() == nullptr && BST_empty_two.end() == nullptr);
-	assert(*BST_two.begin() == 2 && BST_two.end() == nullptr);
-	assert(*BST_big_number.begin() == 1000000 && BST_big_number.end() == nullptr);
-	assert(*BST_less_than_one.begin() - 0.1 < 0.001 && BST_less_than_one.end() == nullptr);
+	BinarySearchTree<int>::Iterator empty_iter;
+	BinarySearchTree<double>::Iterator empty_iter_double;
+
+	assert(BST_empty_two.begin() == empty_iter && BST_empty_two.end() == empty_iter);
+	assert(*BST_two.begin() == 2 && BST_two.end() == empty_iter);
+	assert(*BST_big_number.begin() == 1000000 && BST_big_number.end() == empty_iter);
+	assert(*BST_less_than_one.begin() - 0.1 < 0.001 && BST_less_than_one.end() == empty_iter_double);
 
 	cout << "tests for Iterator begin, end PASS!" << endl;
 	return;
