@@ -1,0 +1,2 @@
+A C== program which implements abstract data types for Map (key/value pairs) and BinarySearchTree, 
+as well as some (e.g. searching) algorithms that benefit from these data structures.
